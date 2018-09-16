@@ -8,6 +8,7 @@ export default class Vec2 {
 	set(x, y) {
 		this.x = x;
 		this.y = y;
+		return this;
 	}
 
 	add(other) {
@@ -32,8 +33,8 @@ export default class Vec2 {
 		return Math.sqrt(this.x*this.x + this.y*this.y);
 	}
 
-	clone() {
-		return new Vec2(this.x, this.y);
+	clone(to) {
+		return to ? to.set(this.x, this.y) : new Vec2(this.x, this.y);
 	}
 
 	reset() {

@@ -9,7 +9,7 @@ export default class ParticleSystem {
 		this.context.font="16px Fixed";
 		this.particles = [];
 		
-		this.gravity = 6; //6 / 0
+		this.gravity = new Vec2(0, 6); //6 / 0
 		this.easeOnCollission =  0.999;// 0.995 / 0.999;
 		this.easeOnContainerCollission = 0.45; //1 / 0.5;
 
@@ -17,11 +17,13 @@ export default class ParticleSystem {
 		this.gridWidth = Math.ceil(this.canvas.width / this.gridSize);
 		this.grid = {};
 		this.initFluidParticles(1000, 0, 3*this.canvas.height/4, this.canvas.width, this.canvas.height/4);
+		this.tmp = new Vec2(0,0);
 	}
 
 	update(dt) {
 		let startTime = performance.now();
-
+		let tmp = this.tmp;
+	
 		this.grid = {};
 		for (let particle of this.particles) {
 			particle.gridIndex = this.getGridIdx(particle.position);
@@ -33,9 +35,9 @@ export default class ParticleSystem {
 
 		for (let particle of this.particles) {
 			particle.force.reset();
-			particle.force.add(new Vec2(0,this.gravity).scale(particle.mass));
+			particle.force.add(this.gravity.clone(tmp).scale(particle.mass));
 			for (let particle1 of this.getParticlesNear(particle)) {
-				let dir = particle1.position.clone().sub(particle.position);
+				let dir = particle1.position.clone(tmp).sub(particle.position);
 				let dist = dir.length();
 				if (dist<particle.radius+particle1.radius && dist>0) {
 					let f = dir.scale(0.2*(dist-particle.radius-particle1.radius));
@@ -47,7 +49,7 @@ export default class ParticleSystem {
 				}
 			}
 
-			particle.velocity.add(particle.force.clone().scale(dt/particle.mass));
+			particle.velocity.add(particle.force.clone(tmp).scale(dt/particle.mass));
 
 			if (particle.position.x<=0 && particle.velocity.x<0) {
 				particle.velocity.x *= -this.easeOnContainerCollission;
@@ -64,7 +66,7 @@ export default class ParticleSystem {
 		}
 
 		for (let particle of this.particles) {
-			particle.position.add(particle.velocity.clone().scale(dt));
+			particle.position.add(particle.velocity.clone(tmp).scale(dt));
 		}
 
 		this.calcTime = performance.now() - startTime;
