@@ -10,7 +10,7 @@ export default class ParticleSystem {
 		this.particles = [];
 		
 		this.gravity = new Vec2(0, 6); //6 / 0
-		this.easeOnCollission =  0.999;// 0.995 / 0.999;
+		this.easeOnCollission =  0.99; //0.99 / 0.95
 		this.easeOnContainerCollission = 0.45; //1 / 0.5;
 
 		this.gridSize = 25;
@@ -42,7 +42,7 @@ export default class ParticleSystem {
 				if (dist<particle.radius+particle1.radius && dist>0) {
 					let f = dir.scale(0.2*(dist-particle.radius-particle1.radius));
 					particle.force.add(f);
-					particle.velocity.scale(this.easeOnCollission); 
+					particle.velocity.scale(1-(1-this.easeOnCollission)*dt);
 				} else if (dist<(particle.radius + particle1.radius  + 20) && dist>0) {
 					let f = dir.scale(0.0005*((particle.radius + particle1.radius + 20)-dist));
 					particle.force.add(f);
@@ -105,7 +105,7 @@ export default class ParticleSystem {
 		this.initFluidParticles(50, this.canvas.width/2-40, 0, 80, 80);
 	}
 
-	render() {
+	render(dt) {
 		let time = performance.now();
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);		
 		for (let particle of this.particles) {
@@ -123,7 +123,8 @@ export default class ParticleSystem {
 		this.context.fillStyle = "#000";
 		this.context.fillText("Particles: "+this.particles.length, 5, 16);
 		this.context.fillText("Physics: "+this.calcTime.toFixed(2)+" ms", 5, 32);
-		this.context.fillText("Rendering: "+renderTime.toFixed(2)+" ms", 5, 48);		
+		this.context.fillText("Rendering: "+renderTime.toFixed(2)+" ms", 5, 48);
+		this.context.fillText("deltaTime: "+dt, 5, 64);
 	}
 
 	drawGrid() {

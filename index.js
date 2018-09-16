@@ -16,10 +16,19 @@ canvas.addEventListener("contextmenu",function(e){
 	system.dropFluid();
 });
 
+document.addEventListener("keypress",function(e){
+	if (e.key=='+' && dtime<0.1) {
+		dtime *= 2.0;
+	}
+	if (e.key=='-') {
+		dtime /= 2.0;
+	}
+});
+
 var dtime = 0.1;
 function tick() {
 	system.update(dtime);
-	system.render();
+	system.render(dtime);
 	requestAnimationFrame(tick);
 }
 
