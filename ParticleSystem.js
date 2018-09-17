@@ -108,15 +108,24 @@ export default class ParticleSystem {
 	render(dt) {
 		let time = performance.now();
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);		
+		var tmp = new Vec2(0,0);
+		var tmp1 = new Vec2(0,0);
+		let lastPos = new Vec2(0,0);
+		
 		for (let particle of this.particles) {
-			this.context.save();
-			this.context.translate((particle.position.x+0.5)|0, (particle.position.y+0.5)|0);
+			particle.position.clone(tmp).round().clone(tmp1);
+			tmp.sub(lastPos);
+			tmp1.clone(lastPos);
+			
+			this.context.translate(tmp.x, tmp.y);
 			this.context.beginPath();
 			this.context.arc(0,0,particle.radius*1.2,0,2*Math.PI);
 			this.context.fillStyle = particle.color;
 			this.context.fill();
-			this.context.restore();
 		}
+		this.context.translate(-lastPos.x, -lastPos.y);
+		
+		
 		this.drawGrid();
 		let renderTime = performance.now() - time;
 

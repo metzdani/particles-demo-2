@@ -33,6 +33,10 @@ export default class Vec2 {
 		return Math.sqrt(this.x*this.x + this.y*this.y);
 	}
 
+	round() {
+		return this.set((this.x+0.5)|0, (this.y+0.5)|0);
+	}
+
 	clone(to) {
 		return to ? to.set(this.x, this.y) : new Vec2(this.x, this.y);
 	}
