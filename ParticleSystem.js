@@ -110,7 +110,7 @@ export default class ParticleSystem {
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);		
 		for (let particle of this.particles) {
 			this.context.save();
-			this.context.translate(particle.position.x, particle.position.y);
+			this.context.translate((particle.position.x+0.5)|0, (particle.position.y+0.5)|0);
 			this.context.beginPath();
 			this.context.arc(0,0,particle.radius*1.2,0,2*Math.PI);
 			this.context.fillStyle = particle.color;
