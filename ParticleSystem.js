@@ -13,7 +13,7 @@ export default class ParticleSystem {
 		this.easeOnCollission =  0.99; //0.99 / 0.95
 		this.easeOnContainerCollission = 0.45; //1 / 0.5;
 
-		this.gridSize = 25;
+		this.gridSize = 7+10+20; // FIXME this should be determined based on the max. radius of particles and interactions
 		this.gridWidth = Math.ceil(this.canvas.width / this.gridSize);
 		this.grid = {};
 		this.initFluidParticles(1000, 0, 3*this.canvas.height/4, this.canvas.width, this.canvas.height/4);
