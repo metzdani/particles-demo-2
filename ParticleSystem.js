@@ -8,6 +8,7 @@ export default class ParticleSystem {
 		this.context = canvas.getContext("2d");
 		this.context.font="16px Fixed";
 		this.particles = [];
+		this.spriteCache = {};
 		
 		this.gravity = new Vec2(0, 6); //6 / 0
 		this.easeOnCollission =  0.99; //0.99 / 0.95
@@ -76,7 +77,7 @@ export default class ParticleSystem {
 		for (let i=0; i<number; i++) {
 			let isHeavy = Math.random()>0.5;
 
-			this.particles.push(
+			this.addParticle(
 				new Particle(
 					isHeavy ? 0.1 : 0.05,
 					isHeavy ? 5 : 7,
@@ -98,7 +99,7 @@ export default class ParticleSystem {
 		particle.velocity.set(-50, 55);
 		particle.mass = 100;
 		particle.color = "#555";
-		this.particles.push(particle);
+		this.addParticle(particle);
 	}
 
 	dropFluid() {
@@ -109,22 +110,10 @@ export default class ParticleSystem {
 		let time = performance.now();
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);		
 		var tmp = new Vec2(0,0);
-		var tmp1 = new Vec2(0,0);
-		let lastPos = new Vec2(0,0);
-		
 		for (let particle of this.particles) {
-			particle.position.clone(tmp).round().clone(tmp1);
-			tmp.sub(lastPos);
-			tmp1.clone(lastPos);
-			
-			this.context.translate(tmp.x, tmp.y);
-			this.context.beginPath();
-			this.context.arc(0,0,particle.radius*1.2,0,2*Math.PI);
-			this.context.fillStyle = particle.color;
-			this.context.fill();
+			particle.position.clone(tmp).round();
+			this.context.drawImage(particle.sprite, tmp.x, tmp.y);
 		}
-		this.context.translate(-lastPos.x, -lastPos.y);
-		
 		
 		this.drawGrid();
 		let renderTime = performance.now() - time;
@@ -157,6 +146,28 @@ export default class ParticleSystem {
 		let x = Math.floor(position.x / this.gridSize);
 		let y = Math.floor(position.y / this.gridSize);
 		return x + y*this.gridWidth;
+	}
+
+	addParticle(particle) {
+		this.particles.push(particle);
+		let key = this.getSpriteCacheKey(particle);
+		if (!this.spriteCache[key]) {
+			let c = document.createElement('canvas');
+			let r = Math.ceil(particle.radius*1.2);
+			let d = r*2;
+			c.width = c.height = d;
+			let ctx = c.getContext('2d');
+			ctx.beginPath();
+			ctx.arc(r,r,r,0,2*Math.PI);
+			ctx.fillStyle = particle.color;
+			ctx.fill();
+			this.spriteCache[key] = c;
+		}
+		particle.sprite = this.spriteCache[key];
+	}
+
+	getSpriteCacheKey(particle) {
+		return particle.color+":"+particle.radius;
 	}
 
 	getParticlesNear(particle) {

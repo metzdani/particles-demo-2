@@ -10,6 +10,7 @@ export default class Particle {
 		this.force = new Vec2(0,0);
 		this.radius = radius;
 		this.gridIndex = -1;
+		this.sprite = null;
 	}
 
 }
