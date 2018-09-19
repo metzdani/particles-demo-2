@@ -37,16 +37,18 @@ export default class ParticleSystem {
 		for (let particle of this.particles) {
 			particle.force.reset();
 			particle.force.add(this.gravity.clone(tmp).scale(particle.mass));
-			for (let particle1 of this.getParticlesNear(particle)) {
-				let dir = particle1.position.clone(tmp).sub(particle.position);
-				let dist = dir.length();
-				if (dist<particle.radius+particle1.radius && dist>0) {
-					let f = dir.scale(0.2*(dist-particle.radius-particle1.radius));
-					particle.force.add(f);
-					particle.velocity.scale(1-(1-this.easeOnCollission)*dt);
-				} else if (dist<(particle.radius + particle1.radius  + 20) && dist>0) {
-					let f = dir.scale(0.0005*((particle.radius + particle1.radius + 20)-dist));
-					particle.force.add(f);
+			for (let cell of this.getGridCellsNear(particle)) {
+				for (let particle1 of cell) {
+					let dir = particle1.position.clone(tmp).sub(particle.position);
+					let dist = dir.length();
+					if (dist<particle.radius+particle1.radius && dist>0) {
+						let f = dir.scale(0.2*(dist-particle.radius-particle1.radius));
+						particle.force.add(f);
+						particle.velocity.scale(1-(1-this.easeOnCollission)*dt);
+					} else if (dist<(particle.radius + particle1.radius  + 20) && dist>0) {
+						let f = dir.scale(0.0005*((particle.radius + particle1.radius + 20)-dist));
+						particle.force.add(f);
+					}
 				}
 			}
 
@@ -158,7 +160,7 @@ export default class ParticleSystem {
 			c.width = c.height = d;
 			let ctx = c.getContext('2d');
 			ctx.beginPath();
-			ctx.arc(r,r,r,0,2*Math.PI);
+			ctx.arc(r,r,particle.radius*1.2,0,2*Math.PI);
 			ctx.fillStyle = particle.color;
 			ctx.fill();
 			this.spriteCache[key] = c;
@@ -170,15 +172,13 @@ export default class ParticleSystem {
 		return particle.color+":"+particle.radius;
 	}
 
-	getParticlesNear(particle) {
+	getGridCellsNear(particle) {
 		let result = [];
 		for (let y=-1; y<=1; y++) {
 			let gridPos = y*this.gridWidth;
 			for (let x=-1; x<=1; x++) {
 				if (this.grid[particle.gridIndex + gridPos + x]) {
-					for (let p of this.grid[particle.gridIndex + gridPos + x]) {
-						result.push(p);
-					}
+					result.push(this.grid[particle.gridIndex + gridPos + x]);
 				}
 			}
 		}
