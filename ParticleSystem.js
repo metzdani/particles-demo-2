@@ -11,10 +11,10 @@ export default class ParticleSystem {
 		this.spriteCache = {};
 		
 		this.gravity = new Vec2(0, 6); //6 / 0
-		this.easeOnCollission =  0.99; //0.99 / 0.95
+		this.easeOnCollission =  0.992; //0.99 / 0.95
 		this.easeOnContainerCollission = 0.45; //1 / 0.5;
 
-		this.gridSize = 7+10+20; // FIXME this should be determined based on the max. radius of particles and interactions
+		this.gridSize = 1;
 		this.gridWidth = Math.ceil(this.canvas.width / this.gridSize);
 		this.grid = {};
 		this.initFluidParticles(1000, 0, 3*this.canvas.height/4, this.canvas.width, this.canvas.height/4);
@@ -41,12 +41,15 @@ export default class ParticleSystem {
 				for (let particle1 of cell) {
 					let dir = particle1.position.clone(tmp).sub(particle.position);
 					let dist = dir.length();
-					if (dist<particle.radius+particle1.radius && dist>0) {
-						let f = dir.scale(0.2*(dist-particle.radius-particle1.radius));
+					let optimalDist = particle.radius+particle1.radius;
+
+
+					if (dist<optimalDist && dist>0) {
+						let f = dir.normalize().scale(1.0*(dist-optimalDist));
 						particle.force.add(f);
 						particle.velocity.scale(1-(1-this.easeOnCollission)*dt);
-					} else if (dist<(particle.radius + particle1.radius  + 20) && dist>0) {
-						let f = dir.scale(0.0005*((particle.radius + particle1.radius + 20)-dist));
+					} else if (dist<(particle.interactionRadius + particle1.interactionRadius) && dist>0) {
+						let f = dir.normalize().scale(0.0025*(dist-optimalDist));
 						particle.force.add(f);
 					}
 				}
@@ -83,6 +86,7 @@ export default class ParticleSystem {
 				new Particle(
 					isHeavy ? 0.1 : 0.05,
 					isHeavy ? 5 : 7,
+					isHeavy ? 17 : 19,
 					new Vec2(tlx+Math.random()*w, tly+Math.random()*h), 
 					new Vec2(0,0),
 					isHeavy ? "rgb(10,50,128,0.8)" : "rgb(150,20,100,0.8)"
@@ -96,7 +100,7 @@ export default class ParticleSystem {
 
 
 	dropStone() {
-		let particle = new Particle(0, 10, new Vec2(0,0), new Vec2(0,0));
+		let particle = new Particle(0, 10, 20, new Vec2(0,0), new Vec2(0,0));
 		particle.position.set(this.canvas.width, this.canvas.height*0.2);
 		particle.velocity.set(-50, 55);
 		particle.mass = 100;
@@ -154,14 +158,19 @@ export default class ParticleSystem {
 	addParticle(particle) {
 		this.particles.push(particle);
 		let key = this.getSpriteCacheKey(particle);
+		if (this.gridSize < particle.interactionRadius*2) {
+			this.gridSize = particle.interactionRadius*2;
+			this.gridWidth = Math.ceil(this.canvas.width / this.gridSize);
+		}
 		if (!this.spriteCache[key]) {
 			let c = document.createElement('canvas');
-			let r = Math.ceil(particle.radius*1.2);
+			let r = Math.ceil(particle.radius);
 			let d = r*2;
 			c.width = c.height = d;
 			let ctx = c.getContext('2d');
+
 			ctx.beginPath();
-			ctx.arc(r,r,particle.radius*1.2,0,2*Math.PI);
+			ctx.arc(r,r,particle.radius,0,2*Math.PI);
 			ctx.fillStyle = particle.color;
 			ctx.fill();
 			this.spriteCache[key] = c;
