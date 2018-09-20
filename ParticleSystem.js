@@ -110,10 +110,11 @@ export default class ParticleSystem {
 
 	render(dt) {
 		let time = performance.now();
-		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);		
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		var tmp = new Vec2(0,0);
+		var tmp1 = new Vec2(0,0);
 		for (let particle of this.particles) {
-			particle.position.clone(tmp).round();
+			particle.position.clone(tmp).sub(tmp1.set(particle.radius, particle.radius)).round();
 			this.context.drawImage(particle.sprite, tmp.x, tmp.y);
 		}
 		
