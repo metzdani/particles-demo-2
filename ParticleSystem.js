@@ -11,7 +11,7 @@ export default class ParticleSystem {
 		this.spriteCache = {};
 		
 		this.gravity = new Vec2(0, 6); //6 / 0
-		this.easeOnCollission =  0.992; //0.99 / 0.95
+		this.easeOnCollission =  0.0001;
 		this.easeOnContainerCollission = 0.45; //1 / 0.5;
 
 		this.gridSize = 1;
@@ -23,7 +23,9 @@ export default class ParticleSystem {
 
 	update(dt) {
 		let startTime = performance.now();
-		let tmp = this.tmp;
+		let tmp = new Vec2(0,0);
+		let relativeVelocity = new Vec2(0,0);
+		let f = new Vec2(0,0);
 	
 		this.grid = {};
 		for (let particle of this.particles) {
@@ -41,20 +43,16 @@ export default class ParticleSystem {
 				for (let particle1 of cell) {
 					let dir = particle1.position.clone(tmp).sub(particle.position);
 					let dist = dir.length();
-					let optimalDist = particle.radius+particle1.radius;
-
-
-					if (dist<optimalDist && dist>0) {
-						let f = dir.normalize().scale(1.0*(dist-optimalDist));
-						particle.force.add(f);
-						particle.velocity.scale(1-(1-this.easeOnCollission)*dt);
-					} else if (dist<(particle.interactionRadius + particle1.interactionRadius) && dist>0) {
-						let f = dir.normalize().scale(0.0025*(dist-optimalDist));
+					if (dist>0 && dist<(particle.interactionRadius + particle1.interactionRadius)) {
+						particle.velocity.clone(relativeVelocity).sub(particle1.velocity);
+						let collissiondist = particle.radius+particle1.radius;
+						let a = (dist<collissiondist) ? 1.0 : 0.0015;
+						dir.clone(f).normalize().scale(a*(dist-collissiondist));
+						f.sub(relativeVelocity.scale(this.easeOnCollission));
 						particle.force.add(f);
 					}
 				}
 			}
-
 			particle.velocity.add(particle.force.clone(tmp).scale(dt/particle.mass));
 
 			if (particle.position.x<=0 && particle.velocity.x<0) {
