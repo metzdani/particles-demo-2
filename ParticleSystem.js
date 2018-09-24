@@ -101,7 +101,7 @@ export default class ParticleSystem {
 		let particle = new Particle(0, 10, 20, new Vec2(0,0), new Vec2(0,0));
 		particle.position.set(this.canvas.width, this.canvas.height*0.2);
 		particle.velocity.set(-50, 55);
-		particle.mass = 100;
+		particle.mass = 20;
 		particle.color = "#555";
 		this.addParticle(particle);
 	}
