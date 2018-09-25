@@ -23,6 +23,9 @@ document.addEventListener("keypress",function(e){
 	if (e.key=='-') {
 		dtime /= 2.0;
 	}
+	if (e.key=='c') {
+		system.cool();
+	}
 });
 
 var dtime = 0.1;
