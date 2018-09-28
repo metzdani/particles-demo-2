@@ -3,6 +3,7 @@ import Vec2 from "./Vec2.js";
 export default class Particle {
 
 	constructor(mass, radius, interactionRadius, position, velocity, color) {
+		this.id = id++;
 		this.position = position;
 		this.velocity = velocity;
 		this.mass = mass;
@@ -15,3 +16,5 @@ export default class Particle {
 	}
 
 }
+
+var id=0;

@@ -2,8 +2,8 @@ import Vec2 from "./Vec2.js";
 import ParticleSystem from "./ParticleSystem.js";
 
 const canvas = document.getElementById("canvas");
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+canvas.width =  canvas.style.width = innerWidth;
+canvas.height = canvas.style.height = innerHeight;
 
 const system = new ParticleSystem(canvas);
 

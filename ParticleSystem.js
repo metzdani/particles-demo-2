@@ -40,20 +40,30 @@ export default class ParticleSystem {
 		for (let particle of this.particles) {
 			particle.force.reset();
 			particle.force.add(this.gravity.clone(tmp).scale(particle.mass));
+		}
+
+		for (let particle of this.particles) {
 			for (let cell of this.getGridCellsNear(particle)) {
 				for (let particle1 of cell) {
-					let dir = particle1.position.clone(tmp).sub(particle.position);
-					let dist = dir.length();
-					if (dist>0 && dist<(particle.interactionRadius + particle1.interactionRadius)) {
-						particle.velocity.clone(relativeVelocity).sub(particle1.velocity);
-						let collissiondist = particle.radius+particle1.radius;
-						let a = (dist<collissiondist) ? 1.40 : 0.00015;
-						dir.clone(f).normalize().scale(a*(dist-collissiondist));
-						f.sub(relativeVelocity.scale(this.easeOnCollission));
-						particle.force.add(f);
+					// particle1.id > particle.id: calculating interaction forces only once per particle pair
+					if (particle1.id > particle.id) {
+						let dir = particle1.position.clone(tmp).sub(particle.position);
+						let dist = dir.length();
+						if (dist>0 && dist<(particle.interactionRadius + particle1.interactionRadius)) {
+							particle.velocity.clone(relativeVelocity).sub(particle1.velocity);
+							let collissiondist = particle.radius+particle1.radius;
+							let a = (dist<collissiondist) ? 1.40 : 0.00015;
+							dir.clone(f).normalize().scale(a*(dist-collissiondist));
+							f.sub(relativeVelocity.scale(this.easeOnCollission));
+							particle.force.add(f);
+							particle1.force.sub(f);
+						}
 					}
 				}
 			}
+		}
+
+		for (let particle of this.particles) {
 			particle.velocity.add(particle.force.clone(tmp).scale(dt/particle.mass));
 
 			if (particle.position.x<=0 && particle.velocity.x<0) {
@@ -85,7 +95,7 @@ export default class ParticleSystem {
 				new Particle(
 					isHeavy ? 0.1 : 0.05,
 					isHeavy ? 5 : 7,
-					isHeavy ? 20 : 22,
+					20,
 					new Vec2(tlx+Math.random()*w, tly+Math.random()*h), 
 					new Vec2(0,0),
 					isHeavy ? "rgb(10,50,128,0.8)" : "rgb(150,20,100,0.8)"
@@ -99,7 +109,7 @@ export default class ParticleSystem {
 
 
 	dropStone() {
-		let particle = new Particle(1, 25, 25, new Vec2(0,0), new Vec2(0,0));
+		let particle = new Particle(1.5, 25, 25, new Vec2(0,0), new Vec2(0,0));
 		particle.position.set(this.canvas.width, this.canvas.height*0.2);
 		particle.velocity.set(-50, 55);
 		particle.color = "#555";
