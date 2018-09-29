@@ -18,16 +18,18 @@ export default class ParticleSystem {
 		this.gridWidth = Math.ceil(this.canvas.width / this.gridSize);
 		this.grid = {};
 		this.initFluidParticles(2000, 0, 0, this.canvas.width, this.canvas.height);
-
-		this.tmp = new Vec2(0,0);
 	}
 
 	update(dt) {
 		let startTime = performance.now();
-		let tmp = new Vec2(0,0);
-		let relativeVelocity = new Vec2(0,0);
-		let f = new Vec2(0,0);
-	
+		this.updateGrid();
+		this.calculateForces();
+		this.updateVelocities(dt);
+		this.updatePositions(dt);
+		this.calcTime = performance.now() - startTime;
+	}
+
+	updateGrid() {
 		this.grid = {};
 		for (let particle of this.particles) {
 			particle.gridIndex = this.getGridIdx(particle.position);
@@ -36,6 +38,11 @@ export default class ParticleSystem {
 			}
 			this.grid[particle.gridIndex].push(particle);
 		}
+	}
+
+	calculateForces() {
+		let relativeVelocity = new Vec2(0,0);
+		let f = new Vec2(0,0);
 
 		for (let particle of this.particles) {
 			particle.force.reset();
@@ -62,7 +69,9 @@ export default class ParticleSystem {
 				}
 			}
 		}
+	}
 
+	updateVelocities(dt) {
 		for (let particle of this.particles) {
 			particle.velocity.add(particle.force.clone(tmp).scale(dt/particle.mass));
 
@@ -79,12 +88,12 @@ export default class ParticleSystem {
 				particle.velocity.y *= -this.easeOnContainerCollission;
 			}
 		}
+	}
 
+	updatePositions(dt) {
 		for (let particle of this.particles) {
 			particle.position.add(particle.velocity.clone(tmp).scale(dt));
 		}
-
-		this.calcTime = performance.now() - startTime;
 	}
 
 	initFluidParticles(number, tlx, tly, w, h, afterInit) {
@@ -107,7 +116,6 @@ export default class ParticleSystem {
 		}
 	}
 
-
 	dropStone() {
 		let particle = new Particle(1.5, 25, 25, new Vec2(0,0), new Vec2(0,0));
 		particle.position.set(this.canvas.width, this.canvas.height*0.2);
@@ -123,8 +131,6 @@ export default class ParticleSystem {
 	render(dt) {
 		let time = performance.now();
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-		var tmp = new Vec2(0,0);
-		var tmp1 = new Vec2(0,0);
 		for (let particle of this.particles) {
 			particle.position.clone(tmp).sub(tmp1.set(particle.radius, particle.radius)).round();
 			this.context.drawImage(particle.sprite, tmp.x, tmp.y);
@@ -211,3 +217,6 @@ export default class ParticleSystem {
 	}
 
 }
+
+var tmp = new Vec2(0,0);
+var tmp1= new Vec2(0,0);
