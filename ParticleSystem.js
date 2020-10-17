@@ -117,7 +117,7 @@ export default class ParticleSystem {
 	}
 
 	dropStone() {
-		let particle = new Particle(1.5, 25, 25, new Vec2(0,0), new Vec2(0,0));
+		let particle = new Particle(10.0, 25, 25, new Vec2(0,0), new Vec2(0,0));
 		particle.position.set(this.canvas.width, this.canvas.height*0.2);
 		particle.velocity.set(-50, 55);
 		particle.color = "#555";
